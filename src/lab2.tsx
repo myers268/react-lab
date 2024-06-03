@@ -1,6 +1,6 @@
 /**
  * 1. Use the useState hook to create an empty recipe array
- * 2. Iterate over the recipes state variable to render a list of RecipeEntry components
+ * 2. Iterate over the recipes state variable to render a list of RecipeCard components
  * 3. Use an onSubmit handler to update recipes state
  * 4. Leverage built-in form validation
  */
@@ -56,16 +56,16 @@ function RecipeBook({ children }: RecipeBookProps) {
   );
 }
 
-type RecipeEntryProps = {
+type RecipeCardProps = {
   name: string;
   ingredients: string;
 };
 
-function RecipeEntry({ name, ingredients }: RecipeEntryProps) {
+function RecipeCard({ name, ingredients }: RecipeCardProps) {
   return (
     <li className="border border-double border-gray-500 rounded divide-y divide-gray-500">
-      <h1 className="text-2xl text-center p-1">{name}</h1>
-      <div className="p-1">{ingredients}</div>
+      <h1 className="text-2xl text-center p-2">{name}</h1>
+      <div className="p-2">{ingredients}</div>
     </li>
   );
 }
