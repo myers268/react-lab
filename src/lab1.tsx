@@ -1,8 +1,8 @@
 /**
- * 1. Return valid JSX from the App component
- * 2. Render the passed text "Lab 1" in the Title component
- * 3. Fix the props in the Greeting component
- * 4. Add types for component props
+ * 1. Return valid JSX from the App component.
+ * 2. Render the passed text "Lab 1" in the Title component by using the `children` prop.
+ * 3. Fix the props in the Greeting component.
+ * 4. Add types for component props.
  */
 
 export function App() {
