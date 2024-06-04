@@ -5,7 +5,7 @@
  * 4. Leverage built-in form validation
  */
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 type Recipe = {
   name: string;
@@ -13,27 +13,45 @@ type Recipe = {
 };
 
 export function App() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+
   return (
     <div className="flex flex-col gap-4 items-center">
       <h1 className="text-2xl">Recipes</h1>
-      <RecipeBook></RecipeBook>
+      <RecipeBook setRecipes={setRecipes}>
+        {recipes.map(({ name, ingredients }) => (
+          <RecipeCard key={name} name={name} ingredients={ingredients} />
+        ))}
+      </RecipeBook>
     </div>
   );
 }
 
 type RecipeBookProps = {
   children?: ReactNode;
+  setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>;
 };
 
-function RecipeBook({ children }: RecipeBookProps) {
+function RecipeBook({ children, setRecipes }: RecipeBookProps) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newRecipe: Recipe = {
+      name: formData.get("name")?.toString() ?? "",
+      ingredients: formData.get("ingredients")?.toString() ?? "",
+    };
+    setRecipes((recipes) => [...recipes, newRecipe]);
+  }
+  
   return (
     <div className="flex flex-col gap-8 w-64">
-      <form className="flex flex-col gap-2">
+      <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
         <label>
           Name
           <input
             name="name"
             className="block border border-gray-500 px-1 rounded w-full bg-gray-100"
+            required
           />
         </label>
         <label>
@@ -41,6 +59,7 @@ function RecipeBook({ children }: RecipeBookProps) {
           <textarea
             name="ingredients"
             className="block border border-gray-500 px-1 rounded w-full bg-gray-100"
+            required
           />
         </label>
         <button
