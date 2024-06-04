@@ -1,8 +1,8 @@
 /**
- * 1. Use the useState hook to create an empty recipe array
- * 2. Iterate over the recipes state variable to render a list of RecipeCard components
- * 3. Use an onSubmit handler to update recipes state
- * 4. Leverage built-in form validation
+ * 1. Use the `useState` hook to create an empty recipe array.
+ * 2. Iterate over the `recipes` state variable to render a list of `RecipeCard` components.
+ * 3. Use an `onSubmit` handler to update recipes state. Parse the form fields from a `FormData` object and create a `newRecipe` variable; use the `setRecipes` state setter to merge `newRecipe` into the state array.
+ * 4. Leverage built-in form validation to ensure that a recipe name and ingredients are provided by adding the `required` prop to the input and textarea elements.
  */
 
 import { ReactNode } from "react";
