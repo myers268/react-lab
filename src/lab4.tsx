@@ -20,36 +20,43 @@
  * 15. Bonus: Observe differences between `useFetch` hook and `suspenseFetch` function.
  */
 
-import type { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
-import { fetchComments, fetchProject, useFetch, useParams } from "./utils";
+import type { Comment, ProjectDetails } from "./utils";
+import { fetchComments, fetchProject, suspenseFetch, useParams } from "./utils";
 
 export function App() {
   const { id } = useParams();
 
+  const getProjectDetails = suspenseFetch(fetchProject(id));
+  const getComments = suspenseFetch(fetchComments(id));
+
   return (
     <div className="flex flex-col gap-4 w-64 mx-auto">
       <h1 className="text-2xl font-medium">My Projects</h1>
-      <Project id={id}></Project>
+      <ErrorBoundary FallbackComponent={ErrorPage}>
+        <Suspense fallback={<Loading />}>
+          <Project getProjectDetails={getProjectDetails}>
+            <ErrorBoundary FallbackComponent={ErrorPage}>
+              <Suspense fallback={<Loading />}>
+                <Comments getComments={getComments} />
+              </Suspense>
+            </ErrorBoundary>
+          </Project>
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }
 
 type ProjectProps = {
-  id: string;
+  getProjectDetails: () => ProjectDetails;
   children?: ReactNode;
 };
 
 function Project(props: ProjectProps) {
-  const { isLoading, error, data } = useFetch(fetchProject(props.id));
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <ErrorPage error={error} />;
-  }
+  const data = props.getProjectDetails();
 
   return (
     <>
@@ -64,20 +71,20 @@ function Project(props: ProjectProps) {
 }
 
 type CommentsProps = {
-  id: string;
+  getComments: () => Comment[];
 };
 
 function Comments(props: CommentsProps) {
+  const data = props.getComments();
+
   return (
     <div>
       <h3 className="text-lg font-medium">Comments</h3>
-      {/* <ul>
+      <ul>
         {data.map((comment) => (
-          <li key={comment.id}>
-            {comment.message}
-          </li>
+          <li key={comment.id}>{comment.message}</li>
         ))}
-      </ul> */}
+      </ul>
     </div>
   );
 }

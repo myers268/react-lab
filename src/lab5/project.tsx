@@ -1,48 +1,51 @@
+import { QueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ReactNode, Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useParams } from "react-router-dom";
+import { LoaderFunctionArgs, useParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 
 import { ErrorPage } from "./error";
-import type { Comment, ProjectDetails } from "../utils";
-import { fetchComments, fetchProject, suspenseFetch } from "../utils";
+import { fetchComments, fetchProject } from "../utils";
 
-// const projectDetailsQuery = (id: string) => ({
-//   queryKey: ["projects", "details", id],
-//   queryFn: async () => fetchProject(id),
-// });
+export const projectDetailsQuery = (id: string) => ({
+  queryKey: ["projects", "details", id],
+  queryFn: async () => fetchProject(id),
+});
 
-// const projectCommentsQuery = (id: string) => ({
-//   queryKey: ["projects", "comments", id],
-//   queryFn: async () => fetchComments(id),
-// });
+export const projectCommentsQuery = (id: string) => ({
+  queryKey: ["projects", "comments", id],
+  queryFn: async () => fetchComments(id),
+});
 
-// export const loader = (queryClient: QueryClient) => async ({ params }: LoaderFunctionArgs) => {
-//   invariant(params.projectId, "Could not parse projectId from URL");
-//   const projectDetails = queryClient.ensureQueryData(projectDetailsQuery(params.projectId));
-//   const comments = queryClient.ensureQueryData(projectCommentsQuery(params.projectId));
+export const loader =
+  (queryClient: QueryClient) =>
+  async ({ params }: LoaderFunctionArgs) => {
+    invariant(params.projectId, "Could not parse projectId from URL");
+    const projectDetails = queryClient.ensureQueryData(
+      projectDetailsQuery(params.projectId)
+    );
+    const comments = queryClient.ensureQueryData(
+      projectCommentsQuery(params.projectId)
+    );
 
-//   return {
-//     projectDetails,
-//     comments,
-//   };
-// }
+    return {
+      projectDetails,
+      comments,
+    };
+  };
 
-export function ProjectPage() {
+export function Component() {
   const params = useParams<{ projectId: string }>();
   invariant(params.projectId, "Could not parse projectId from URL");
-
-  const getProjectDetails = suspenseFetch(fetchProject(params.projectId));
-  const getComments = suspenseFetch(fetchComments(params.projectId));
 
   return (
     <div className="flex flex-col gap-4">
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <Suspense fallback={<div>Loading...</div>}>
-          <ProjectDetails getProjectDetails={getProjectDetails}>
+          <ProjectDetails id={params.projectId}>
             <ErrorBoundary FallbackComponent={ErrorPage}>
               <Suspense fallback={<div>Loading...</div>}>
-                <ProjectComments getComments={getComments} />
+                <ProjectComments id={params.projectId} />
               </Suspense>
             </ErrorBoundary>
           </ProjectDetails>
@@ -53,12 +56,12 @@ export function ProjectPage() {
 }
 
 type ProjectDetailsProps = {
-  getProjectDetails: () => ProjectDetails;
+  id: string;
   children?: ReactNode;
 };
 
 function ProjectDetails(props: ProjectDetailsProps) {
-  const data = props.getProjectDetails();
+  const { data } = useSuspenseQuery(projectDetailsQuery(props.id));
 
   return (
     <>
@@ -73,11 +76,11 @@ function ProjectDetails(props: ProjectDetailsProps) {
 }
 
 type ProjectCommentsProps = {
-  getComments: () => Comment[];
+  id: string;
 };
 
 function ProjectComments(props: ProjectCommentsProps) {
-  const data = props.getComments();
+  const { data } = useSuspenseQuery(projectCommentsQuery(props.id));
 
   return (
     <div>
