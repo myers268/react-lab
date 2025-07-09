@@ -74,7 +74,7 @@ export function useFetch<T>(promise: Promise<T>) {
 
   useEffect(() => {
     (async () => {
-      setResult(await promise);
+      setResult(await promise.catch(err => err));
     })();
   }, []);
 
